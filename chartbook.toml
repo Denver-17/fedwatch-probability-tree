@@ -1,0 +1,49 @@
+[project]
+name = "FedWatch Probability Tree, 2026"
+description = "Market-implied probabilities of each target-range outcome at the next four FOMC meetings, one row per weekday session, meeting, and outcome, from August 3 through November 19, 2026, computed with my FINM 32800 HW 2 FedWatch replication extended to CME's multi-meeting probability tree. Derived probabilities only: no futures prices."
+maintainer = "Denver-17"
+contributors = ["Denver-17"]
+repo_url = "https://github.com/Denver-17/fedwatch-probability-tree"
+copyright = "2026"
+os_compatibility = ["Windows", "Linux", "macOS"]
+requires_chartbook = ">=0.5.1"
+
+
+## The one table this repository publishes. It is committed, not built: the
+## export that writes it runs my private HW 2 code, so there is no [scripts].
+[dataframes.fedwatch_probability_tree]
+name = "FedWatch Probability Tree by Session"
+description = "For each weekday session and each FOMC meeting not yet decided at that close, the probability, in percent, of each target range the meeting could leave in place."
+sources = ["CME 30-Day Federal Funds futures (ZQ)", "Effective federal funds rate (EFFR)"]
+providers = ["Databento (CME Globex, GLBX.MDP3)", "Federal Reserve Bank of St. Louis (FRED)"]
+provider_links = ["https://databento.com/datasets/GLBX.MDP3", "https://fred.stlouisfed.org/series/EFFR"]
+access_types = ["Public"]
+license = "The probabilities are mine to share. The futures prices they are computed from are licensed from Databento and are not redistributed here."
+pull_method = "Committed CSV, written by a private export that runs my HW 2 FedWatch replication on every session"
+tags = ["FOMC", "Monetary policy", "Fed funds futures", "FedWatch"]
+date_col = "date"
+path = "./data/fedwatch_probability_tree.csv"
+docs = """One row per weekday session, FOMC meeting, and outcome, from 2026-08-03 to
+2026-11-19. Sunday-evening bars, the thin trading that opens the CME week, are dropped.
+
+- `date`: the session. Each probability uses that day's closing futures prices.
+- `meeting`: the last day of an FOMC meeting not yet decided at that close
+  (2026-09-16, 2026-10-28, 2026-12-09, or 2027-01-27). A meeting appears only
+  on sessions before its decision day.
+- `lower_bp`: the floor of the target range, in basis points, that the meeting
+  would leave in place (375 is the 3.75-4.00 percent range).
+- `prob_pct`: the probability of that outcome, in percent. For each date and
+  meeting the outcomes sum to 100, to rounding.
+- `current_lower_bp`: the floor of the range in effect at that session's close;
+  on a decision day, after that day's decision. A hike count is
+  (lower_bp - current_lower_bp) / 25.
+
+Method: CME FedWatch's multi-meeting probability tree, as replicated in my HW 2.
+Each meeting's expected rate after the decision comes from the next contract
+month when that month has no meeting, and otherwise is solved from the meeting
+month's own average. The rate before it is that day's EFFR when the meeting is in
+the current month, and otherwise the rate the previous contract month implies at
+its end. The expected move, in 25 bp steps, is split between the two nearest
+outcomes, and each meeting's outcomes are chained onto the previous meeting's.
+
+Only probabilities are published here: no futures prices and no EFFR values."""
